@@ -7,7 +7,7 @@ export const authenticateToken = (req, res, next) => {
         res.sendStatus(401);
         return;
     }
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
         if (err) {
             return res.sendStatus(403);
         }
