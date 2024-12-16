@@ -3,8 +3,7 @@ import authRoutes from './auth-routes.js';
 import apiRoutes from './api/index.js';
 import { authenticateToken } from '../middleware/auth.js';
 const router = Router();
-router.use('/auth', authRoutes);
-// TODO: Add authentication to the API routes
-//router.use(authenticateToken);
-router.use('/api', authenticateToken, apiRoutes);
+router.use('/auth', authRoutes); // Login route does not require authentication
+router.use(authenticateToken); // Middleware for protected routes
+router.use('/api', apiRoutes);
 export default router;
