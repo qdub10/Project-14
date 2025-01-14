@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 interface JwtPayload {
   username: string;
+  id: string; // Add user ID to the payload
 }
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
@@ -17,8 +18,10 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   jwt.verify(token, process.env.JWT_SECRET_KEY as string, (err, decoded: any) => {
     if (err) {
+      console.error('JWT verification error:', err.message); // Log error for debugging
       return res.sendStatus(403);
     }
+    console.log('Decoded JWT payload:', decoded); // Debug log to verify the decoded payload
     req.user = decoded as JwtPayload;
     next();
     return;

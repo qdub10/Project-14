@@ -1,10 +1,11 @@
 import { UserLogin } from "../interfaces/UserLogin";
+import Auth from "../utils/auth"; // Import Auth to include Authorization header
 
 const login = async (userInfo: UserLogin) => {
   console.log('Request body:', userInfo); // Debug log for frontend request
 
   try {
-    const res = await fetch('http://localhost:3001/api/auth/login', {
+    const res = await fetch('/api/auth/login', { // Updated fetch URL to use proxy
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -13,23 +14,19 @@ const login = async (userInfo: UserLogin) => {
       credentials: 'include', // Include credentials for CORS handling if needed
     });
 
-    // Read the response body once
-    const rawBody = await res.text();
+    // Check for HTTP status and handle unauthorized or errors explicitly
+    if (res.status === 401) {
+      throw new Error('Unauthorized: Invalid username or password');
+    }
 
     if (!res.ok) {
-      // Parse the raw body as JSON, fallback to plain text
-      let errorMessage = 'Login failed'; // Default error message
-      try {
-        const errorData = JSON.parse(rawBody); // Attempt to parse JSON
-        errorMessage = errorData.message || errorMessage;
-      } catch {
-        errorMessage = rawBody; // Fallback to plain text if JSON parsing fails
-      }
+      // Default error message for non-200 responses
+      const errorMessage = `Error: ${res.status} - ${res.statusText}`;
       throw new Error(errorMessage);
     }
 
-    // If the response is OK, parse it as JSON
-    const data = JSON.parse(rawBody);
+    // Parse the response body as JSON
+    const data = await res.json();
     console.log('Response data:', data); // Debug log for backend response
     return data;
   } catch (err) {
@@ -42,4 +39,31 @@ const login = async (userInfo: UserLogin) => {
   }
 };
 
-export { login };
+const fetchUserTickets = async (userId: string) => {
+  console.log(`Fetching tickets for user: ${userId}`);
+
+  try {
+    const res = await fetch(`/api/tickets/user/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${Auth.getToken()}`, // Include Authorization header with token
+      },
+      credentials: 'include', // Include credentials for CORS handling if needed
+    });
+
+    if (!res.ok) {
+      const errorMessage = `Error: ${res.status} - ${res.statusText}`;
+      throw new Error(errorMessage);
+    }
+
+    const data = await res.json();
+    console.log('Fetched tickets:', data); // Debug log for backend response
+    return data;
+  } catch (err) {
+    console.error('Error fetching user tickets:', err);
+    throw err; // Rethrow for the frontend to handle
+  }
+};
+
+export { login, fetchUserTickets };

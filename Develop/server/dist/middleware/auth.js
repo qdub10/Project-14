@@ -9,8 +9,10 @@ export const authenticateToken = (req, res, next) => {
     }
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
         if (err) {
+            console.error('JWT verification error:', err.message); // Log error for debugging
             return res.sendStatus(403);
         }
+        console.log('Decoded JWT payload:', decoded); // Debug log to verify the decoded payload
         req.user = decoded;
         next();
         return;

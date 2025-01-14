@@ -18,6 +18,31 @@ export const getAllTickets = async (_req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+// GET /tickets/user/:userId
+export const getTicketsByUserId = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const tickets = await Ticket.findAll({
+            where: { assignedUserId: userId },
+            include: [
+                {
+                    model: User,
+                    as: 'assignedUser',
+                    attributes: ['username'],
+                },
+            ],
+        });
+        if (tickets.length > 0) {
+            res.json(tickets);
+        }
+        else {
+            res.status(404).json({ message: 'No tickets found for this user' });
+        }
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 // GET /tickets/:id
 export const getTicketById = async (req, res) => {
     const { id } = req.params;
